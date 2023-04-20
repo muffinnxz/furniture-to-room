@@ -1,8 +1,14 @@
 import { createContext, useContext, useState } from "react";
 
+export const roomTypes = ["bedroom", "living room"];
+
+export const roomStyles = ["modern", "minimalist", "comtemporary"];
+
 interface GeneratorContextInterface {
-  prompt: string | null;
-  setPrompt: (value: string | null) => void | null;
+  roomType: string | undefined;
+  setRoomType: (value: string) => void | null;
+  roomStyle: string | undefined;
+  setRoomStyle: (value: string) => void | null;
   imageName: string | null;
   setImageName: (value: string | null) => void | null;
   originalImage: string | null;
@@ -34,9 +40,9 @@ export function GeneratorProvider({
 }: {
   children?: React.ReactNode;
 }) {
-  const [prompt, setPrompt] = useState<string | null>(
-    null
-  );
+  const [roomType, setRoomType] = useState<string>(roomTypes[0]);
+  const [roomStyle, setRoomStyle] = useState<string>(roomStyles[0]);
+
   const [imageName, setImageName] = useState<string | null>(null);
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [noBgOriginalImage, setNoBgOriginalImage] = useState<string | null>(
@@ -49,8 +55,10 @@ export function GeneratorProvider({
   const [resultLoading, setResultLoading] = useState(false);
 
   const value = {
-    prompt,
-    setPrompt,
+    roomType,
+    setRoomType,
+    roomStyle,
+    setRoomStyle,
     imageName,
     setImageName,
     originalImage,

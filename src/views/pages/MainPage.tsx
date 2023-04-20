@@ -9,12 +9,6 @@ export function MainPage() {
     <AppLayout>
       <GeneratorProvider>
         <VStack textAlign={"center"}>
-          <Text fontSize={"24px"} fontWeight={"bold"}>
-            An open-source product commercial photo generator
-          </Text>
-          <Button colorScheme={"spaceblue"}>
-            View Code
-          </Button>
           <Grid
             templateColumns="repeat(10, 1fr)"
             gap={4}

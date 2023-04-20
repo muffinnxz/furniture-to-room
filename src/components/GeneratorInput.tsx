@@ -1,17 +1,16 @@
-import { useGenerator } from "@/contexts/GeneratorContext";
+import {
+  roomStyles,
+  roomTypes,
+  useGenerator,
+} from "@/contexts/GeneratorContext";
 import {
   Button,
   Flex,
-  Grid,
-  GridItem,
   Image,
-  Spinner,
+  Select,
   Text,
-  Textarea,
-  VStack,
 } from "@chakra-ui/react";
 import axios from "axios";
-import { useState } from "react";
 import { UploadDropzone } from "react-uploader";
 import { Uploader } from "uploader";
 
@@ -32,8 +31,10 @@ const options = {
 
 export default function GeneratorInput() {
   const {
-    prompt,
-    setPrompt,
+    roomType,
+    setRoomType,
+    roomStyle,
+    setRoomStyle,
     setImageName,
     setOriginalImage,
     setNoBgOriginalImage,
@@ -46,9 +47,6 @@ export default function GeneratorInput() {
     setResultLoading,
   } = useGenerator();
 
-  const [imageLoading, setImageLoading] = useState(false);
-  const [captionLoading, setCaptionLoading] = useState(false);
-
   const UploadZone = () => (
     <UploadDropzone
       uploader={uploader}
@@ -58,18 +56,8 @@ export default function GeneratorInput() {
           setImageName(file[0].originalFile.originalFileName);
           const imageUrl = file[0].fileUrl.replace("raw", "thumbnail");
           setOriginalImage(imageUrl);
-          setImageLoading(true);
-          axios
-            .post("/api/masking", { imageUrl })
-            .then((res) => {
-              console.log(res.data);
-              setNoBgOriginalImage(res.data[0]);
-              setMaskedOriginalImage(res.data[1]);
-              setImageLoading(false);
-            })
-            .catch((err) => {
-              setImageLoading(false);
-            });
+          setNoBgOriginalImage(null);
+          setMaskedOriginalImage(null);
         }
       }}
       width="670px"
@@ -77,34 +65,35 @@ export default function GeneratorInput() {
     />
   );
 
-  const getCaption = () => {
-    if (originalImage) {
-      setCaptionLoading(true);
+  const generateResult = async () => {
+    setResultLoading(true);
+    if (!noBgOriginalImage || !maskedOriginalImage) {
+      axios.post("/api/masking", { imageUrl: originalImage }).then((res) => {
+        setNoBgOriginalImage(res.data[0]);
+        setMaskedOriginalImage(res.data[1]);
+        axios
+          .post("/api/generate", {
+            prompt: `${roomStyle}, ${roomType} `,
+            imageUrl: res.data[0],
+            imageMaskUrl: res.data[1],
+          })
+          .then((res) => {
+            setGeneratedImage(res.data);
+            setResultLoading(false);
+          });
+      });
+    } else {
       axios
-        .post("/api/caption", { imageUrl: originalImage })
-        .then((res) => {
-          setPrompt(res.data);
-          setCaptionLoading(false);
+        .post("/api/generate", {
+          prompt,
+          imageUrl: noBgOriginalImage,
+          imageMaskUrl: maskedOriginalImage,
         })
-        .catch((err) => {
-          setCaptionLoading(false);
+        .then((res) => {
+          setGeneratedImage(res.data);
+          setResultLoading(false);
         });
     }
-  };
-
-  const generateResult = async () => {
-    if (!prompt || !noBgOriginalImage || !maskedOriginalImage) return;
-    setResultLoading(true);
-    axios
-      .post("/api/generate", {
-        prompt,
-        imageUrl: noBgOriginalImage,
-        imageMaskUrl: maskedOriginalImage,
-      })
-      .then((res) => {
-        setGeneratedImage(res.data);
-        setResultLoading(false);
-      });
   };
 
   return (
@@ -118,105 +107,63 @@ export default function GeneratorInput() {
       gap={2}
       w="100%"
     >
-      <Text fontWeight={"bold"}>Prompt</Text>
-      {!captionLoading ? (
-        <Textarea
-          value={prompt ? prompt : ""}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Example: A bottle of perfume, on the rock, mountain view, sunset light."
-          isDisabled={captionLoading}
+      <Text fontWeight={"bold"}>Select room type</Text>
+      <Select
+        value={roomType}
+        onChange={(e) => {
+          setRoomType(e.target.value);
+        }}
+      >
+        {roomTypes.map((type, idx) => (
+          <option key={idx} value={type}>
+            {type}
+          </option>
+        ))}
+      </Select>
+      <Text fontWeight={"bold"}>Select room style</Text>
+      <Select
+        value={roomStyle}
+        onChange={(e) => {
+          setRoomStyle(e.target.value);
+        }}
+      >
+        {roomStyles.map((style, idx) => (
+          <option key={idx} value={style}>
+            {style}
+          </option>
+        ))}
+      </Select>
+      <Text fontWeight={"bold"}>Upload Image</Text>
+      {originalImage ? (
+        <Image
+          alt="original photo"
+          src={originalImage}
+          width={"100%"}
+          borderRadius={8}
         />
       ) : (
-        <VStack h="100%" alignItems={"center"} justifyContent={"center"}>
-          <Spinner
-            thickness="6px"
-            speed="0.65s"
-            emptyColor="gray.200"
-            color="primary.0"
-            w={"60px"}
-            h={"60px"}
-          />
-          <Text>Generating Prompt...</Text>
-        </VStack>
-      )}
-
-      <Button
-        colorScheme={"spaceblue"}
-        onClick={() => {
-          getCaption();
-        }}
-        isDisabled={
-          captionLoading || resultLoading || imageLoading || !originalImage
-        }
-      >
-        <Text fontWeight={"bold"}>Auto Prompt (Slow)</Text>
-      </Button>
-      <Text fontWeight={"bold"}>Upload Image</Text>
-      {originalImage && noBgOriginalImage && !imageLoading && (
-        <Grid templateColumns="repeat(2, 1fr)" gap={2}>
-          <GridItem colSpan={1}>
-            <Image
-              alt="original photo"
-              src={originalImage}
-              width={"100%"}
-              borderRadius={8}
-            />
-          </GridItem>
-          <GridItem colSpan={1}>
-            <Image
-              alt="no bg original photo"
-              src={noBgOriginalImage}
-              width={"100%"}
-              borderRadius={8}
-            />
-          </GridItem>
-        </Grid>
-      )}
-      {!originalImage && !imageLoading && <UploadZone />}
-      {imageLoading && (
-        <VStack h="100%" alignItems={"center"} justifyContent={"center"}>
-          <Spinner
-            thickness="6px"
-            speed="0.65s"
-            emptyColor="gray.200"
-            color="primary.0"
-            w={"60px"}
-            h={"60px"}
-          />
-          <Text>Processing Image...</Text>
-        </VStack>
+        <UploadZone />
       )}
       <Button
         colorScheme={"spaceblue"}
         onClick={() => {
           generateResult();
         }}
-        isDisabled={
-          captionLoading ||
-          resultLoading ||
-          imageLoading ||
-          !prompt ||
-          !originalImage ||
-          !noBgOriginalImage ||
-          !maskedOriginalImage
-        }
+        isDisabled={resultLoading || !originalImage}
       >
         <Text fontWeight={"bold"}>Generate</Text>
       </Button>
       <Button
         colorScheme={"gray"}
         onClick={() => {
-          setPrompt("");
           setImageName("");
           setOriginalImage("");
           setNoBgOriginalImage("");
           setMaskedOriginalImage("");
           setGeneratedImage("");
-          setCaptionLoading(false);
-          setImageLoading(false);
           setResultLoading(false);
         }}
-        isDisabled={imageLoading}
+        isDisabled={resultLoading || !originalImage}
       >
         <Text fontWeight={"bold"}>Reset</Text>
       </Button>
