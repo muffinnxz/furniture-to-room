@@ -1,7 +1,7 @@
 import GeneratorInput from "@/components/GeneratorInput";
 import GeneratorOutput from "@/components/GeneratorOutput";
 import { GeneratorProvider } from "@/contexts/GeneratorContext";
-import { Button, Grid, GridItem, Text, VStack } from "@chakra-ui/react";
+import { Grid, GridItem, VStack } from "@chakra-ui/react";
 import AppLayout from "../layouts/AppLayout";
 
 export function MainPage() {

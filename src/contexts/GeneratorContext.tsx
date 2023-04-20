@@ -44,7 +44,7 @@ export function GeneratorProvider({
   const [roomStyle, setRoomStyle] = useState<string>(roomStyles[0]);
 
   const [imageName, setImageName] = useState<string | null>(null);
-  const [originalImage, setOriginalImage] = useState<string | null>(null);
+  const [originalImage, setOriginalImage] = useState<string | null>("https://upcdn.io/12a1y2r/image/furniture-to-room/test-furniture-2-6WiB.jpg?w=600&h=600&fit=max&q=70");
   const [noBgOriginalImage, setNoBgOriginalImage] = useState<string | null>(
     null
   );

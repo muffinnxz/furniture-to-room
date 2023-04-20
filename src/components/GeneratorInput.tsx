@@ -3,13 +3,7 @@ import {
   roomTypes,
   useGenerator,
 } from "@/contexts/GeneratorContext";
-import {
-  Button,
-  Flex,
-  Image,
-  Select,
-  Text,
-} from "@chakra-ui/react";
+import { Button, Flex, Image, Select, Text } from "@chakra-ui/react";
 import axios from "axios";
 import { UploadDropzone } from "react-uploader";
 import { Uploader } from "uploader";
@@ -74,11 +68,12 @@ export default function GeneratorInput() {
         axios
           .post("/api/generate", {
             prompt: `${roomStyle}, ${roomType} `,
-            imageUrl: res.data[0],
+            imageUrl: originalImage,
             imageMaskUrl: res.data[1],
           })
           .then((res) => {
-            setGeneratedImage(res.data);
+            console.log(res.data);
+            setGeneratedImage(res.data.artifacts[0].base64);
             setResultLoading(false);
           });
       });

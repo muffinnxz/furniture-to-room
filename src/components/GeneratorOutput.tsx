@@ -62,7 +62,7 @@ export default function GeneratorOutput() {
         {!resultLoading && originalImage && generatedImage && !sideBySide && (
           <Image
             alt="restored photo"
-            src={generatedImage}
+            src={`data:image/jpeg;base64,${generatedImage}`}
             width={{ base: "100%", md: "60%" }}
             borderRadius={8}
           />
