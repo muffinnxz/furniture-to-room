@@ -1,8 +1,8 @@
 import { createContext, useContext, useState } from "react";
 
-export const roomTypes = ["living room", "bedroom"];
+export const roomTypes = ["Living Room", "Bedroom"];
 
-export const roomStyles = ["modern", "minimalist", "comtemporary"];
+export const roomStyles = ["Modern", "Minimalist", "Comtemporary"];
 
 interface GeneratorContextInterface {
   roomType: string | undefined;
