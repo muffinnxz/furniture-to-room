@@ -29,13 +29,13 @@ export default function GeneratorOutput() {
         <Text fontWeight={"extrabold"} fontSize={"24px"}>
           Result
         </Text>
-        <Flex alignItems={"center"} gap={4}>
+        {/* <Flex alignItems={"center"} gap={4}>
           <Text>comparision</Text>
           <Switch
             isChecked={sideBySide}
             onChange={(e) => setSideBySide(e.target.checked)}
           />
-        </Flex>
+        </Flex> */}
       </Flex>
       <VStack
         p={4}
@@ -60,20 +60,29 @@ export default function GeneratorOutput() {
           <Text>No result generated yet.</Text>
         )}
         {!resultLoading && originalImage && generatedImage && !sideBySide && (
-          <Image
-            alt="restored photo"
-            src={`data:image/jpeg;base64,${generatedImage}`}
-            width={{ base: "100%", md: "60%" }}
-            borderRadius={8}
-          />
+          <VStack w="100%">
+            {generatedImage.map((v: any, idx: any) => (
+              <Image
+                key={idx}
+                alt="restored photo"
+                src={`data:image/jpeg;base64,${v.base64}`}
+                width={{ base: "100%", md: "60%" }}
+                borderRadius={8}
+              />
+            ))}
+          </VStack>
         )}
         {!resultLoading && originalImage && generatedImage && sideBySide && (
-          <Box width={{ base: "100%", md: "60%" }}>
-            <CompareSlider
-              original={originalImage!}
-              restored={generatedImage!}
-            />
-          </Box>
+          <VStack w="100%">
+            {generatedImage.map((v: any, idx: any) => (
+              <Box width={{ base: "100%", md: "60%" }} key={idx}>
+                <CompareSlider
+                  original={originalImage!}
+                  restored={`data:image/jpeg;base64,${v.base64}`!}
+                />
+              </Box>
+            ))}
+          </VStack>
         )}
       </VStack>
     </Flex>

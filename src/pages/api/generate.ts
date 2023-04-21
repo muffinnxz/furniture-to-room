@@ -114,10 +114,10 @@ export default async function handler(
               formData.append("mask_image", buffer2);
               formData.append("mask_source", "MASK_IMAGE_BLACK");
               formData.append("text_prompts[0][text]", prompt);
-              formData.append("cfg_scale", "7");
-              formData.append("clip_guidance_preset", "FAST_BLUE");
-              formData.append("samples", 1);
+              formData.append("cfg_scale", "9");
+              formData.append("samples", 4);
               formData.append("steps", 30);
+              formData.append("style_preset", "3d-model");
             });
           });
 
@@ -135,17 +135,7 @@ export default async function handler(
 
           responseJSON = (await startResponse?.data) as GenerationResponse;
 
-          return responseJSON
-            ? responseJSON
-            : {
-                artifacts: [
-                  {
-                    base64: "asdasd",
-                    seed: 5,
-                    finishReason: "asdasd",
-                  },
-                ],
-              };
+          return responseJSON;
         })
         .catch((err) => {
           console.log(err);

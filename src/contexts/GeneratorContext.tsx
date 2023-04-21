@@ -13,8 +13,8 @@ interface GeneratorContextInterface {
   setImageName: (value: string | null) => void | null;
   originalImage: string | null;
   setOriginalImage: (value: string | null) => void | null;
-  generatedImage: string | null;
-  setGeneratedImage: (value: string | null) => void | null;
+  generatedImage: any;
+  setGeneratedImage: (value: any) => void | null;
   noBgOriginalImage: string | null;
   setNoBgOriginalImage: (value: string | null) => void | null;
   maskedOriginalImage: string | null;
@@ -51,7 +51,7 @@ export function GeneratorProvider({
   const [maskedOriginalImage, setMaskedOriginalImage] = useState<string | null>(
     null
   );
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [generatedImage, setGeneratedImage] = useState<any>(null);
   const [resultLoading, setResultLoading] = useState(false);
 
   const value = {
