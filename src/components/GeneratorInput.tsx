@@ -61,34 +61,16 @@ export default function GeneratorInput() {
 
   const generateResult = async () => {
     setResultLoading(true);
-    if (!noBgOriginalImage || !maskedOriginalImage) {
-      axios.post("/api/masking", { imageUrl: originalImage }).then((res) => {
-        setNoBgOriginalImage(res.data[0]);
-        setMaskedOriginalImage(res.data[1]);
-        axios
-          .post("/api/generate", {
-            prompt: `${roomStyle}, ${roomType} `,
-            imageUrl: originalImage,
-            imageMaskUrl: res.data[1],
-          })
-          .then((res) => {
-            console.log(res.data);
-            setGeneratedImage(res.data.artifacts[0].base64);
-            setResultLoading(false);
-          });
+    axios
+      .post("/api/generate", {
+        prompt: `masterpiece, best quality, ${roomStyle} style room, ${roomType}`,
+        imageUrl: originalImage,
+      })
+      .then((res) => {
+        console.log(res.data);
+        setGeneratedImage(res.data.artifacts[0].base64);
+        setResultLoading(false);
       });
-    } else {
-      axios
-        .post("/api/generate", {
-          prompt,
-          imageUrl: noBgOriginalImage,
-          imageMaskUrl: maskedOriginalImage,
-        })
-        .then((res) => {
-          setGeneratedImage(res.data);
-          setResultLoading(false);
-        });
-    }
   };
 
   return (
