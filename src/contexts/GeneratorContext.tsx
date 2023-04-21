@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react";
 
-export const roomTypes = ["bedroom", "living room"];
+export const roomTypes = ["living room", "bedroom"];
 
 export const roomStyles = ["modern", "minimalist", "comtemporary"];
 
