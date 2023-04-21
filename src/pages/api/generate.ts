@@ -1,7 +1,7 @@
 import axios from "axios";
 import FormData from "form-data";
 import type { NextApiRequest, NextApiResponse } from "next/types";
-import cv, { rows } from "@techstark/opencv-js";
+import cv from "@techstark/opencv-js";
 import Jimp from "jimp";
 
 interface GenerationResponse {
@@ -31,21 +31,19 @@ export default async function handler(
 ) {
   const { prompt, imageUrl, imageMaskUrl } = req.body;
 
-  console.log(imageUrl, imageMaskUrl);
-
-  Jimp.read(imageUrl)
+  const result = await Jimp.read(imageUrl)
     .then(async (image) => {
-      Jimp.read(imageMaskUrl)
+      return await Jimp.read(imageMaskUrl)
         .then(async (maskImage) => {
           const img1 = cv.matFromImageData(image.bitmap);
           const img2 = cv.matFromImageData(maskImage.bitmap);
 
           const base_size = 64;
-          const pi = 2;
-          const pt = 4,
+          const pi = 4;
+          const pt = 2,
             pb = 2,
-            pl = 3,
-            pr = 3;
+            pl = 2,
+            pr = 2;
 
           cv.resize(
             img1,
@@ -106,10 +104,12 @@ export default async function handler(
           });
           // jimpImg2.write("test2.png");
 
+          let responseJSON: GenerationResponse | null = null;
+
+          const formData = new FormData();
           jimpImg1.getBuffer(Jimp.MIME_PNG, async (e, buffer) => {
             jimpImg2.getBuffer(Jimp.MIME_PNG, async (e, buffer2) => {
               // https://platform.stability.ai/rest-api#tag/v1generation/operation/masking
-              const formData = new FormData();
               formData.append("init_image", buffer);
               formData.append("mask_image", buffer2);
               formData.append("mask_source", "MASK_IMAGE_BLACK");
@@ -118,35 +118,43 @@ export default async function handler(
               formData.append("clip_guidance_preset", "FAST_BLUE");
               formData.append("samples", 1);
               formData.append("steps", 30);
-
-              let startResponse = await axios
-                .post(
-                  "https://api.stability.ai/v1/generation/stable-inpainting-512-v2-0/image-to-image/masking",
-                  formData,
-                  {
-                    headers: {
-                      ...formData.getHeaders(),
-                      Accept: "application/json",
-                      Authorization: `Bearer ${process.env.STABILITY_API_KEY}`,
-                    },
-                  }
-                )
-                .catch((err) => {
-                  console.log(err);
-                });
-
-              const responseJSON =
-                (await startResponse?.data) as GenerationResponse;
-
-              return res.status(200).json(responseJSON);
             });
           });
+
+          let startResponse = await axios.post(
+            "https://api.stability.ai/v1/generation/stable-inpainting-512-v2-0/image-to-image/masking",
+            formData,
+            {
+              headers: {
+                ...formData.getHeaders(),
+                Accept: "application/json",
+                Authorization: `Bearer ${process.env.STABILITY_API_KEY}`,
+              },
+            }
+          );
+
+          responseJSON = (await startResponse?.data) as GenerationResponse;
+
+          return responseJSON
+            ? responseJSON
+            : {
+                artifacts: [
+                  {
+                    base64: "asdasd",
+                    seed: 5,
+                    finishReason: "asdasd",
+                  },
+                ],
+              };
         })
         .catch((err) => {
-          return res.status(500).json(err);
+          console.log(err);
+          return null;
         });
     })
     .catch((err) => {
-      return res.status(500).json(err);
+      console.log(err);
+      return null;
     });
+  res.status(200).json(result ? result : { artifacts: [] });
 }
