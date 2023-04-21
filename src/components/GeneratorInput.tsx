@@ -5,6 +5,7 @@ import {
 } from "@/contexts/GeneratorContext";
 import { Button, Flex, Image, Select, Text, VStack } from "@chakra-ui/react";
 import axios from "axios";
+import { useState } from "react";
 import { UploadDropzone } from "react-uploader";
 import { Uploader } from "uploader";
 
@@ -40,6 +41,7 @@ export default function GeneratorInput() {
     resultLoading,
     setResultLoading,
   } = useGenerator();
+  const [error, setError] = useState<string>("");
 
   const UploadZone = () => (
     <UploadDropzone
@@ -60,23 +62,34 @@ export default function GeneratorInput() {
   );
 
   const generateResult = async () => {
+    setError("");
     setResultLoading(true);
     if (!noBgOriginalImage || !maskedOriginalImage) {
-      axios.post("/api/masking", { imageUrl: originalImage }).then((res) => {
-        setNoBgOriginalImage(res.data[0]);
-        setMaskedOriginalImage(res.data[1]);
-        axios
-          .post("/api/generate", {
-            prompt: `${roomType}, ${roomStyle} style, masterpiece, best quality`,
-            imageUrl: originalImage,
-            imageMaskUrl: res.data[1],
-          })
-          .then((res) => {
-            console.log(res.data);
-            setGeneratedImage(res.data.artifacts);
-            setResultLoading(false);
-          });
-      });
+      axios
+        .post("/api/masking", { imageUrl: originalImage })
+        .then((res) => {
+          setNoBgOriginalImage(res.data[0]);
+          setMaskedOriginalImage(res.data[1]);
+          axios
+            .post("/api/generate", {
+              prompt: `${roomType}, ${roomStyle} style, masterpiece, best quality`,
+              imageUrl: originalImage,
+              imageMaskUrl: res.data[1],
+            })
+            .then((res) => {
+              console.log(res.data);
+              setGeneratedImage(res.data.artifacts);
+              setResultLoading(false);
+            })
+            .catch((err) => {
+              setError("Something when wrong, please try again.");
+              setResultLoading(false);
+            });
+        })
+        .catch((err) => {
+          setError("Something when wrong, please try again.");
+          setResultLoading(false);
+        });
     } else {
       axios
         .post("/api/generate", {
@@ -87,6 +100,10 @@ export default function GeneratorInput() {
         .then((res) => {
           console.log(res.data);
           setGeneratedImage(res.data.artifacts);
+          setResultLoading(false);
+        })
+        .catch((err) => {
+          setError("Something when wrong, please try again.");
           setResultLoading(false);
         });
     }
@@ -163,6 +180,7 @@ export default function GeneratorInput() {
       >
         <Text fontWeight={"bold"}>Reset</Text>
       </Button>
+      <Text color={"red.300"}>{error}</Text>
     </Flex>
   );
 }

@@ -1,19 +1,17 @@
 import { useGenerator } from "@/contexts/GeneratorContext";
 import {
-  Box,
   Flex,
+  Grid,
+  GridItem,
   Image,
   Spinner,
-  Switch,
   Text,
   VStack,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
-import { CompareSlider } from "./CompareSlider";
+import React from "react";
 
 export default function GeneratorOutput() {
   const { originalImage, generatedImage, resultLoading } = useGenerator();
-  const [sideBySide, setSideBySide] = useState(false);
   return (
     <Flex
       flexDirection={"column"}
@@ -59,30 +57,32 @@ export default function GeneratorOutput() {
         {!resultLoading && !generatedImage && (
           <Text>No result generated yet.</Text>
         )}
-        {!resultLoading && originalImage && generatedImage && !sideBySide && (
-          <VStack w="100%">
-            {generatedImage.map((v: any, idx: any) => (
-              <Image
-                key={idx}
-                alt="restored photo"
-                src={`data:image/jpeg;base64,${v.base64}`}
-                width={{ base: "100%", md: "60%" }}
-                borderRadius={8}
-              />
-            ))}
-          </VStack>
-        )}
-        {!resultLoading && originalImage && generatedImage && sideBySide && (
-          <VStack w="100%">
-            {generatedImage.map((v: any, idx: any) => (
-              <Box width={{ base: "100%", md: "60%" }} key={idx}>
-                <CompareSlider
-                  original={originalImage!}
-                  restored={`data:image/jpeg;base64,${v.base64}`!}
-                />
-              </Box>
-            ))}
-          </VStack>
+        {!resultLoading && originalImage && generatedImage && (
+          <Grid
+            w="100%"
+            templateColumns={{
+              md: "repeat(2, 1fr)",
+              base: "repeat(1, 1fr)",
+            }}
+            gap={4}
+          >
+            {generatedImage.length === 0 ? (
+              <Text color={"red.300"}>
+                {"Something when wrong, please try again."}
+              </Text>
+            ) : (
+              generatedImage.map((v: any, idx: any) => (
+                <GridItem key={idx} w="100%">
+                  <Image
+                    alt="restored photo"
+                    src={`data:image/jpeg;base64,${v.base64}`}
+                    width="100%"
+                    borderRadius={8}
+                  />
+                </GridItem>
+              ))
+            )}
+          </Grid>
         )}
       </VStack>
     </Flex>
