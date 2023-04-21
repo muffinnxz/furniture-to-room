@@ -1,5 +1,6 @@
 import { useGenerator } from "@/contexts/GeneratorContext";
 import {
+  Button,
   Flex,
   Grid,
   GridItem,
@@ -8,10 +9,46 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import React from "react";
+import axios from "axios";
+import React, { useCallback } from "react";
 
 export default function GeneratorOutput() {
-  const { originalImage, generatedImage, resultLoading } = useGenerator();
+  const {
+    originalImage,
+    generatedImage,
+    resultLoading,
+    roomStyle,
+    roomType,
+    maskedOriginalImage,
+    setGeneratedImage,
+    setResultLoading,
+  } = useGenerator();
+
+  const regenerate = useCallback(() => {
+    setResultLoading(true);
+    axios
+      .post("/api/generate", {
+        prompt: `${roomType}, ${roomStyle} style, masterpiece, best quality`,
+        imageUrl: originalImage,
+        imageMaskUrl: maskedOriginalImage,
+      })
+      .then((res) => {
+        console.log(res.data);
+        setGeneratedImage(res.data.artifacts);
+        setResultLoading(false);
+      })
+      .catch((err) => {
+        setResultLoading(false);
+      });
+  }, [
+    maskedOriginalImage,
+    originalImage,
+    roomStyle,
+    roomType,
+    setGeneratedImage,
+    setResultLoading,
+  ]);
+
   return (
     <Flex
       flexDirection={"column"}
@@ -83,6 +120,11 @@ export default function GeneratorOutput() {
               ))
             )}
           </Grid>
+        )}
+        {!resultLoading && (
+          <Button colorScheme={"spaceblue"} onClick={regenerate}>
+            Regenerate
+          </Button>
         )}
       </VStack>
     </Flex>

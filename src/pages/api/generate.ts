@@ -113,7 +113,7 @@ export default async function handler(
               formData.append("init_image", buffer);
               formData.append("mask_image", buffer2);
               formData.append("mask_source", "MASK_IMAGE_BLACK");
-              formData.append("text_prompts[0][text]", prompt);
+              formData.append("text_prompts[0][text]", prompt.toLowerCase());
               formData.append("cfg_scale", "9");
               formData.append("samples", 4);
               formData.append("steps", 30);

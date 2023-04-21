@@ -19,7 +19,7 @@ export function MainPage() {
             <GridItem colSpan={10}>
               <Text fontSize={{ md: "24px", base: "16px" }} fontWeight={600}>
                 Work best with furniture picture with high-resolution, no
-                backgroud, furniture fit the image frame.
+                background, furniture fit the image frame.
               </Text>
             </GridItem>
             <GridItem colSpan={{ base: 10, md: 4 }}>
